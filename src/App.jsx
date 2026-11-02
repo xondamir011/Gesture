@@ -307,7 +307,6 @@ export default function App() {
       return;
     }
 
-    // Ruxsatni alohida so'raymiz (kamera oqimidan mustaqil)
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
       s.getTracks().forEach((t) => t.stop());
@@ -401,13 +400,12 @@ export default function App() {
         throw new Error("Kamera uchun localhost yoki HTTPS manzilidan foydalaning.");
       }
 
-      const portrait = window.innerHeight > window.innerWidth;
-
+      // Telefonlarda ortiqcha zoom bo'lmasligi uchun yumshoq resolution
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
-          width: { ideal: portrait ? 720 : 1280 },
-          height: { ideal: portrait ? 1280 : 720 },
+          width: { ideal: 960 },
+          height: { ideal: 720 },
         },
         audio: false,
       });
@@ -496,7 +494,7 @@ export default function App() {
     let n = 0;
     [[8, 6], [12, 10], [16, 14], [20, 18]].forEach(([tip, pip]) => {
       if (d(tip, 0) > d(pip, 0) * 1.1) n++;
-    });
+      });
     if (d(4, 17) > d(2, 17) * 1.1) n++;
     return n;
   }
@@ -590,19 +588,15 @@ export default function App() {
         lastPointRef.current = null;
       }
 
-      // ---- Ekran koordinatasi (object-contain + mirror) ----
+      // ---- Ekran koordinatasi (object-cover + mirror) ----
       const W = box.clientWidth;
       const H = box.clientHeight;
-      // object-contain uchun Math.min
-      const scale = Math.min(W / vw, H / vh);
+      const scale = Math.max(W / vw, H / vh);
       let sx = 0;
       let sy = 0;
       if (p) {
-        // contain: video markazda, qora chetlar bo'lishi mumkin
-        const offsetX = (W - vw * scale) / 2;
-        const offsetY = (H - vh * scale) / 2;
-        sx = W - (offsetX + p.x * scale); // mirror
-        sy = offsetY + p.y * scale;
+        sx = W - ((W - vw * scale) / 2 + p.x * scale);
+        sy = (H - vh * scale) / 2 + p.y * scale;
       }
 
       // ---- Kursor ----
@@ -798,17 +792,17 @@ export default function App() {
           autoPlay
           muted
           playsInline
-          className={`absolute inset-0 h-full w-full -scale-x-100 object-contain ${cameraOn ? "" : "hidden"}`}
+          className={`absolute inset-0 h-full w-full -scale-x-100 object-cover ${cameraOn ? "" : "hidden"}`}
         />
 
         <canvas
           ref={drawRef}
-          className={`pointer-events-none absolute inset-0 h-full w-full -scale-x-100 object-contain ${cameraOn ? "" : "hidden"}`}
+          className={`pointer-events-none absolute inset-0 h-full w-full -scale-x-100 object-cover ${cameraOn ? "" : "hidden"}`}
         />
 
         <canvas
           ref={overlayRef}
-          className={`pointer-events-none absolute inset-0 h-full w-full -scale-x-100 object-contain ${cameraOn ? "" : "hidden"}`}
+          className={`pointer-events-none absolute inset-0 h-full w-full -scale-x-100 object-cover ${cameraOn ? "" : "hidden"}`}
         />
 
         <div
